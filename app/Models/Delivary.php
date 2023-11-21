@@ -33,7 +33,7 @@ class Delivary extends Model
     protected function delivaryStatus(): Attribute
     {
         return new Attribute(
-            get: fn($value) => ["new", "الكابتن في الطريق", 'وصل الكابتن للاستلام', 'استلم', 'وصل الكابتن للتسليم', 'الكابتن سلم'][$value],
+            get: fn($value) => ["new", "الكابتن في الطريق", 'استلم',  'الكابتن سلم'][$value],
         );
     }
     public function scopePaiddelivaries(Builder $query): void

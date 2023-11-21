@@ -141,7 +141,7 @@ class CartController extends Controller
     public function delivarycancel($id)
     {
         $delivary = Delivary::findOrFail($id);
-        $array = ["new", "الكابتن في الطريق", 'وصل الكابتن للاستلام', 'استلم', 'وصل الكابتن للتسليم', 'الكابتن سلم'];
+        $array = ["new", "الكابتن في الطريق",  'استلم', 'الكابتن سلم'];
         if (array_search($delivary->delivary_status, $array) < 2) {
 
             $this->reverseProperty($delivary, 'cancel');
@@ -177,13 +177,13 @@ class CartController extends Controller
     {
         abort_if(!request()->has('id'), 500, 'something is off');
         $delivary = Delivary::findOrFail(request()->integer('id'));
-        $array = ["new", "الكابتن في الطريق", 'وصل الكابتن للاستلام', 'استلم', 'وصل الكابتن للتسليم', 'الكابتن سلم'];
+        $array = ["new", "الكابتن في الطريق",  'استلم',  'الكابتن سلم'];
         $numb = array_search($delivary->delivary_status, $array) + 1;
-        if ($numb < 6)
+        if ($numb < 4)
             $delivary->delivary_status = $numb;
         if ($numb == 1)
             $delivary->start_at = Carbon::now();
-        if ($numb == 5)
+        if ($numb == 3)
             $delivary->finsh_at = Carbon::now();
         $delivary->save();
         if (!is_null($delivary->user))

@@ -194,4 +194,12 @@
             search: true
         });
     </script>
+    @if (Request::is('admin/dashbord/delivary/new'))
+        <script>
+            // JavaScript code to refresh the page every minute
+            setInterval(function() {
+                location.reload();
+            }, 60000); // 60000 milliseconds = 1 minute
+        </script>
+    @endif
 @endsection

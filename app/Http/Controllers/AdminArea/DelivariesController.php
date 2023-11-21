@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\AdminArea;
 
 use App\Http\Controllers\Controller;
+use App\Models\Address;
 use App\Models\City;
 use App\Models\Delivary;
 use App\Models\Fees;
@@ -153,7 +154,7 @@ class DelivariesController extends Controller
     public function store(Request $request)
     {
         $this->construct();
-        $Fee = Fees::where('from', $request->integer('cityGet'))->where('to', $request->integer('citySent'))->first();
+        $Fee = Fees::where('formcity', $request->integer('cityGet'))->where('tocity', $request->integer('citySent'))->first();
         abort_if(is_null($Fee), 404, 'something went worng');
         $delivary = Delivary::create([
             'user_id' => $request->input('user_id'),
@@ -162,20 +163,23 @@ class DelivariesController extends Controller
             'price' => $Fee->price,
             'fee' => $Fee->fee,
         ]);
-        $delivary->addressGet()->create([
+        $address = Address::create([
             'name' => $request->input('nameGet'),
             'neighbourhood' => $request->input('neighbourhoodGet'),
             'city_id' => $request->input('cityGet'),
             'details' => $request->input('detailsGet'),
             'phone' => $request->input('phoneGet'),
         ]);
-        $delivary->addressSent()->create([
+        $delivary->address_get = $address->id;
+        $address = Address::create([
             'name' => $request->input('nameSent'),
             'neighbourhood' => $request->input('neighbourhoodSent'),
             'city_id' => $request->input('citySent'),
             'details' => $request->input('detailsSent'),
             'phone' => $request->input('phoneSent'),
         ]);
+        $delivary->address_sent = $address->id;
+        $delivary->save();
         return back()->with('success', 'Saved successfully');
     }
     public function Update(Request $request)

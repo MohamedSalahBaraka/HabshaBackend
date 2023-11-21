@@ -32,18 +32,21 @@ class UserController extends Controller
         'name',
         'phone',
     ];
-    private function validator(array $data, $photo = false)
+    private function validator(array $data, $photo = false, $phone = false)
     {
         $photovaldation = ['image'];
         if ($photo)
             $photovaldation[] = 'required';
+        $phonevaldation = ['required'];
+        if ($phone)
+            $phonevaldation[] = 'unique:users';
         return Validator::make($data, [
             'name' => [
                 'required',
                 'string',
                 'max:100',
             ],
-            'phone' => ['required'],
+            'phone' => $phonevaldation,
             'password' => ['confirmed'],
             'photo' => $photovaldation,
         ], [
@@ -124,7 +127,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $this->construct();
-        $this->validator($request->all())->validate();
+        $this->validator($request->all(), false, true)->validate();
         $path = $this->photoUploader($request);
         // dd($request->hasFile('photo'));
         $class = new $this->class;

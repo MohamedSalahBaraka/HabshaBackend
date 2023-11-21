@@ -10,6 +10,7 @@ use App\Models\Size;
 use App\Traits\ModelSort;
 use App\Traits\Upload;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\Models\Order;
@@ -69,21 +70,33 @@ class ShowController extends Controller
     public function landing()
     {
         $currentTime = Carbon::now();
-        $currentHour = $currentTime->format('H');
+        $currentHour = (int) $currentTime->format('H');
         $dishes = Dish::orderBy('created_at', 'desc')->with('sizes')->whereHas('user', function ($q) use ($currentHour) {
-            $q->where('opening', "<=", $currentHour)->where('clothing', ">=", $currentHour);
+            $q->where(function (Builder $query) use ($currentHour) {
+                $query->whereColumn('opening', '<', 'clothing')->where('opening', "<=", $currentHour)->where('clothing', ">=", $currentHour);
+            })->orWhere(function (Builder $query) use ($currentHour) {
+                $query->whereColumn('opening', '>', 'clothing')->where('opening', ">=", $currentHour)->where('clothing', "<=", $currentHour);
+            });
         })->limit(6)->get();
         $categories = Category::all();
-        $restaurants = User::orderBy('created_at', 'desc')->where('type', 'restaurant')->limit(8)->get();
+        $restaurants = User::orderBy('created_at', 'desc')->where('type', 'restaurant')->where(function (Builder $query) use ($currentHour) {
+            $query->whereColumn('opening', '<', 'clothing')->where('opening', "<=", $currentHour)->where('clothing', ">=", $currentHour);
+        })->orWhere(function (Builder $query) use ($currentHour) {
+            $query->whereColumn('opening', '>', 'clothing')->where('opening', ">=", $currentHour)->where('clothing', "<=", $currentHour);
+        })->limit(8)->get();
         return response()->json(['dishes' => $dishes, 'categories' => $categories, 'restaurants' => $restaurants]);
     }
 
     public function dishes(Request $request)
     {
         $currentTime = Carbon::now();
-        $currentHour = $currentTime->format('H');
+        $currentHour = (int) $currentTime->format('H');
         $dishes = Dish::orderBy('created_at', 'desc')->whereHas('user', function ($q) use ($currentHour) {
-            $q->where('opening', "<=", $currentHour)->where('clothing', ">=", $currentHour);
+            $q->where(function (Builder $query) use ($currentHour) {
+                $query->whereColumn('opening', '<', 'clothing')->where('opening', "<=", $currentHour)->where('clothing', ">=", $currentHour);
+            })->orWhere(function (Builder $query) use ($currentHour) {
+                $query->whereColumn('opening', '>', 'clothing')->where('opening', ">=", $currentHour)->where('clothing', "<=", $currentHour);
+            });
         });
         if ($request->has('keyword')) {
             $dishes = $dishes->search($request->input('keyword'));
